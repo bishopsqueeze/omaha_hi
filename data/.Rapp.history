@@ -1,0 +1,421 @@
+install.packages("ctv")
+library(ctv)
+install.views("Bayesian")#
+#ChemPhys 	Chemometrics and Computational Physics#
+#ClinicalTrials 	Clinical Trial Design, Monitoring, and Analysis#
+install.views("Cluster")                    ## Cluster Analysis & Finite Mixture Models#
+install.views("DifferentialEquations")      ## Differential Equations#
+install.views("Distributions")              ## Probability Distributions#
+install.views("Econometrics")               ## Computational Econometrics#
+##Environmetrics 	Analysis of Ecological and Environmental Data#
+##ExperimentalDesign 	Design of Experiments (DoE) & Analysis of Experimental Data#
+install.views("Finance")                    ## Empirical Finance#
+##Genetics 	Statistical Genetics#
+install.views("Graphics")                   ## Graphic Displays & Dynamic Graphics & Graphic Devices & Visualization#
+install.views("HighPerformanceComputing") 	## High-Performance and Parallel Computing with R#
+install.views("MachineLearning")            ## Machine Learning & Statistical Learning#
+install.views("MedicalImaging")             ## Medical Image Analysis#
+##MetaAnalysis 	Meta-Analysis#
+install.views("Multivariate")               ## Multivariate Statistics#
+install.views("NaturalLanguageProcessing") 	## Natural Language Processing#
+install.views("NumericalMathematics")       ## Numerical Mathematics#
+##OfficialStatistics 	Official Statistics & Survey Methodology#
+install.views("Optimization")               ## Optimization and Mathematical Programming#
+##Pharmacokinetics 	Analysis of Pharmacokinetic Data#
+##Phylogenetics 	Phylogenetics, Especially Comparative Methods#
+install.views("Psychometrics")              ## Psychometric Models and Methods#
+##ReproducibleResearch 	Reproducible Research#
+install.views("Robust")                     ## Robust Statistical Methods#
+##SocialSciences 	Statistics for the Social Sciences#
+install.views("Spatial")                    ## Analysis of Spatial Data#
+install.views("SpatioTemporal")             ## Handling and Analyzing Spatio-Temporal Data#
+install.views("Survival")                   ## Survival Analysis#
+install.views("TimeSeries")                 ## Time Series Analysis#
+##WebTechnologies 	Web Technologies and Services#
+##gR 	gRaphical Models in R
+q()
+##------------------------------------------------------------------#
+## Load libraries#
+##------------------------------------------------------------------#
+library(data.table)#
+#
+##------------------------------------------------------------------#
+## Clear the workspace#
+##------------------------------------------------------------------#
+rm(list=ls())#
+#
+##------------------------------------------------------------------#
+## Set the working directory#
+##------------------------------------------------------------------#
+setwd("/Users/alexstephens/Development/poker/data")#
+#
+##------------------------------------------------------------------#
+## Read the test and training datasets#
+##------------------------------------------------------------------#
+#
+## read the 6-max file#
+d.raw   <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)
+head(d.raw)
+grep("(", d.raw)
+d.raw[1]
+d.raw[1,q]
+d.raw[1,1]
+grep("[(]", d.raw[1,1])
+grep("(", d.raw[1,1])
+as.character(d.raw[1,1])
+grep("[(]",as.character(d.raw[1,1]))
+?grep
+pmatch("(",as.character(d.raw[1,1]))
+nchar(as.character(d.raw[1,1]))
+nchar(as.character(d.raw[1,1]))
+nchar(d.raw)
+nchar(as.character(d.raw))
+dim(d.raw)
+apply(d.raw, 2, nchar)
+table(apply(d.raw, 2, nchar))
+class(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"
+head(d.raw)
+## append additional characterisitcs#
+d.raw$nchar     <- nchar(d.raw)
+head(d.raw)
+## append additional characterisitcs#
+d.raw$nchar     <- apply(d.raw, 2, nchar)
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw$nchar     <- apply(d.raw, 2, nchar)
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("ch")] <- apply(d.raw, 2, nchar)
+head(d.raw)
+apply(d.raw, 2, nchar)
+apply(as.characte(d.raw), 2, nchar)
+apply(as.character(d.raw), 2, nchar)
+apply(d.raw[,1], 2, nchar)
+d.raw[,1]
+lapply(d.raw[,1], nchar)
+lapply(as.character(d.raw), nchar)
+lapply(as.character(d.raw[,1]), nchar)
+unlist(lapply(as.character(d.raw[,1]), nchar))
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("ch")] <- unlist(lapply(as.character(d.raw[,1]), nchar))
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")] <- unlist(lapply(as.character(d.raw[,1]), nchar))
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")]    <- unlist(lapply(as.character(d.raw[,1]), nchar))#
+#
+d.raw[,c("suit")]   <- ifelse(d.raw$nch == 8, "ds", ifelse(d.raw$nch == 6, "ss", "ns"))
+head(d.raw)
+tail(d.raw)
+table(nch)
+table(d.raw$nch)
+table(d.raw$suit)
+gsub(#
+## strip suit identifiers#
+d.raw[,c("cards")]  <- gsub("[()]","",d.raw$raw.hand))
+## strip suit identifiers#
+d.raw[,c("cards")]  <- gsub("[()]","",d.raw$raw.hand)
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")]    <- unlist(lapply(as.character(d.raw[,1]), nchar))#
+#
+d.raw[,c("suit")]   <- ifelse(d.raw$nch == 8, "ds", ifelse(d.raw$nch == 6, "ss", "ns"))#
+#
+## strip suit identifiers#
+d.raw[,c("cards")]  <- sort(gsub("[()]","",d.raw$raw.hand))
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")]    <- unlist(lapply(as.character(d.raw[,1]), nchar))#
+#
+d.raw[,c("suit")]   <- ifelse(d.raw$nch == 8, "ds", ifelse(d.raw$nch == 6, "ss", "ns"))#
+#
+## strip suit identifiers#
+d.raw[,c("cards")]  <- gsub("[()]","",d.raw$raw.hand)
+head(d.raw)
+head(d.raw$cards)
+head(d.raw$cards[1])
+order(d.raw$cards[1])
+strsplit(d.raw$cards[1],"")
+LETTERS
+c("A",2:9,"T","J","Q","K")
+## create card-speficic columns#
+d.raw[,c("A",2:9,"T","J","Q","K")] <- NA
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")]    <- unlist(lapply(as.character(d.raw[,1]), nchar))#
+#
+d.raw[,c("suit")]   <- ifelse(d.raw$nch == 8, "ds", ifelse(d.raw$nch == 6, "ss", "ns"))#
+#
+## strip suit identifiers#
+d.raw[,c("cards")]  <- gsub("[()]","",d.raw$raw.hand)#
+#
+## create card-speficic columns#
+d.raw[,c("A",2:9,"T","J","Q","K")] <- 0
+head(d.raw)
+strsplit(d.raw$cards[1])
+strsplit(d.raw$cards[1],"")
+table(strsplit(d.raw$cards[1],""))
+grep(colnames(d.raw),colnames(table(strsplit(d.raw$cards[1],""))))
+which(colnames(table(strsplit(d.raw$cards[1],""))) %in% colnames(d.raw))
+colnames(table(strsplit(d.raw$cards[1],"")))
+names(table(strsplit(d.raw$cards[1],"")))
+which(names(table(strsplit(d.raw$cards[1],""))) %in% colnames(d.raw))
+which(colnames(d.raw) %in% names(table(strsplit(d.raw$cards[1],""))))
+tapply(d.raw$cards, 1:nrow(d.raw), function(x) { table(strsplit(x,"")) })
+tail(d.raw)
+tapply(d.raw$cards, 1:nrow(d.raw), function(x) { names(table(strsplit(x,""))) })
+head(d.raw)
+which(strsplit(d.raw$cards[1]) %in% colnames(d.raw))
+which(strsplit(d.raw$cards[1],"") %in% colnames(d.raw))
+which(colnames(d.raw) %in% strsplit(d.raw$cards[1],""))
+colnames(d.raw)
+strsplit(d.raw$cards[1],"")
+which(colnames(d.raw) %in% unlist(strsplit(d.raw$cards[1],"")))
+table(unlist(strsplit(d.raw$cards[1],"")))
+table(unlist(strsplit(d.raw$cards[16000],"")))
+which(colnames(d.raw) %in% unlist(strsplit(d.raw$cards[16000],"")))
+rank    <- c("A",2:9,"T","J","Q","K")
+rank
+which(rank %in% strsplit(d.raw$cards[1],""))
+d.raw$cards[1]
+tmp.cars <- strsplit(d.raw$cards[1], "")
+tmp.cars
+tmp.tbl(tmp.cars)
+table(tmp.cars)
+names(table(tmp.cars))
+tmp.cars
+table(table(tmp.cars))
+table(tmp.cars)
+h <- d.raw$cards[1]
+h
+tmp.cards   <- strsplit(h, "")#
+    tmp.tbl     <- table(tmp.cards)#
+    tmp.idx     <- which( rank %in% names(tmp.tbl))
+tmp.id
+tmp.idx
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")]    <- unlist(lapply(as.character(d.raw[,1]), nchar))#
+#
+d.raw[,c("suit")]   <- ifelse(d.raw$nch == 8, "ds", ifelse(d.raw$nch == 6, "ss", "ns"))#
+#
+## strip suit identifiers#
+d.raw[,c("cards")]  <- gsub("[()]","",d.raw$raw.hand)#
+#
+## create card-speficic columns#
+d.raw[,rank] <- 0
+head(d.raw)
+rank
+which(rank %in% c("A","T","A","T"))
+(rank %in% c("A","T","A","T"))
+table(rank, )c("A","T","A","T")
+table(rank,c("A","T","A","T"))
+table(c("A", "T", "A", "T"))
+as.vector(table(c("A", "T", "A", "T")))
+handRankIndex  <- function(h, rank) {#
+    tmp.table  <- table(strsplit(h, ""))#
+    return(idx=which(rank %in% names(tmp.table)), val=as.vector(tmp.table))#
+}
+handRankIndex(c("A", "T", "A", "T"), rank)
+handRankIndex(h, rank)
+h
+handRankIndex  <- function(h, rank) {#
+    tmp.table  <- table(strsplit(h, ""))#
+    return(list(idx=which(rank %in% names(tmp.table)), val=as.vector(tmp.table)))#
+}
+handRankIndex(h, rank)
+## count combos in each hand#
+tapply(d.raw$cards, 1:nrow(d.raw), function(x) { d.raw[,handRankIndex(x, rank)$idx+4] <- handRankIndex(x, rank)$val})
+## count combos in each hand#
+#tapply(d.raw$cards, 1:nrow(d.raw), function(x) { d.raw[,handRankIndex(x, rank)$idx+4] <- handRankIndex(x, rank)$val})#
+tapply(d.raw$cards[1:10,], 1:10, function(x) { d.raw[,handRankIndex(x, rank)$idx+4] <- handRankIndex(x, rank)$val})
+d.raw$cards[1:10, ]
+tapply(d.raw$cards[1:10], 1:10, function(x) { d.raw[,handRankIndex(x, rank)$idx+4] <- handRankIndex(x, rank)$val})
+i <- 1
+tmp.cards   <- d.raw$cards
+tmp.cards
+tmp.cards   <- d.raw$cards[i]
+tmp.cards
+handRankIndex(tmp.cards, rank)$idx
+handRankIndex(tmp.cards, rank)$idx+4
+##------------------------------------------------------------------#
+###
+##------------------------------------------------------------------#
+rank    <- c("A",2:9,"T","J","Q","K")#
+handRankIndex  <- function(h, rank) {#
+    tmp.table  <- table(strsplit(h, ""))#
+    return(list(idx=which(rank %in% names(tmp.table)), cnt=as.vector(tmp.table)))#
+}
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")]    <- unlist(lapply(as.character(d.raw[,1]), nchar))#
+#
+d.raw[,c("suit")]   <- ifelse(d.raw$nch == 8, "ds", ifelse(d.raw$nch == 6, "ss", "ns"))#
+#
+## strip suit identifiers#
+d.raw[,c("cards")]  <- gsub("[()]","",d.raw$raw.hand)#
+#
+## create card-speficic columns#
+d.raw[,rank] <- 0#
+#
+## count combos in each hand
+for (i in 1:10) {#
+    tmp.cards   <- d.raw$cards[i]#
+    d.raw[i,handRankIndex(tmp.cards, rank)$idx+4]   <- handRankIndex(tmp.cards, rank)$cnt#
+}
+head(d.raw)
+## read the 6-max file#
+d.raw           <- read.csv("ppt_plo_handrankings_06handed.txt", header=FALSE)#
+colnames(d.raw) <- "raw.hand"#
+#
+## append additional characterisitcs#
+d.raw[,c("nch")]    <- unlist(lapply(as.character(d.raw[,1]), nchar))#
+#
+d.raw[,c("suit")]   <- ifelse(d.raw$nch == 8, "ds", ifelse(d.raw$nch == 6, "ss", "ns"))#
+#
+## strip suit identifiers#
+d.raw[,c("cards")]  <- gsub("[()]","",d.raw$raw.hand)#
+#
+## create card-speficic columns#
+d.raw[,rank] <- 0#
+#
+## count combos in each hand#
+for (i in 1:nrow(d.raw)) {#
+    tmp.cards   <- d.raw$cards[i]#
+    d.raw[i,handRankIndex(tmp.cards, rank)$idx+4]   <- handRankIndex(tmp.cards, rank)$cnt#
+}
+head(d.raw)
+tail(d.raw)
+head(substr(d.raw$hand,1,2))
+head(substr(d.raw$cards,1,2))
+head(substr(d.raw$cards,3,4))
+## create individual hands#
+d.raw[,c("p1")] <- substr(d.raw$cards,1,2)#
+d.raw[,c("p2")] <- substr(d.raw$cards,3,4)
+head(d,raw)
+head(d.raw)
+length(unique(p1))
+length(unique(d.raw$p1))
+table(d.raw$p1)
+table(d.raw$p2)
+length(d.raw$p1)
+length(d.raw$p2)
+length(unique(d.raw$p1))
+length(unique(d.raw$p2))
+n.p1    <- length(unique(d.raw$p1))#
+n.p2    <- length(unique(d.raw$p2))
+n.p1
+n.p2
+n.p1    <- length(unique(d.raw$p1))#
+n.p2    <- length(unique(d.raw$p2))#
+#
+d.mat           <- matrix(0, nrow=n.p2, ncol=n.p1)#
+colnames(d.mat) <- unique(d.raw$p1)#
+rownames(d.mat) <- unique(d.raw$p2)
+head(d.mat)
+head(d.mat)
+head(d.mat)
+i <- 1
+d.raw[i,c("p1")]
+d.raw[i,c("p2")]
+grep(d.raw[i,c("p1")] , colnames(d.mat))
+grep(d.raw[i,c("p1")] , colnames(d.mat))#
+##------------------------------------------------------------------#
+###
+##------------------------------------------------------------------#
+n.p1    <- length(unique(d.raw$p1))#
+n.p2    <- length(unique(d.raw$p2))#
+#
+d.mat           <- matrix(0, nrow=n.p2, ncol=n.p1)#
+colnames(d.mat) <- unique(d.raw$p1)#
+rownames(d.mat) <- unique(d.raw$p2)#
+#
+for (i in 1:nrow(d.raw)) {#
+    i           <- grep(d.raw[i,c("p2")] , rownames(d.mat))#
+    j           <- grep(d.raw[i,c("p1")] , colnames(d.mat))#
+    d.mat[i,j]  <- d.mat[i,j] + 1#
+}
+head(d.mat)
+head(d.mat)
+tail(d.mat)
+sum(d.raw$p1 == "AT")
+head(d.mat)
+apply(d.mat, 2, sum)
+n.p1    <- length(unique(d.raw$p1))#
+n.p2    <- length(unique(d.raw$p2))#
+#
+d.mat           <- matrix(0, nrow=n.p2, ncol=n.p1)#
+colnames(d.mat) <- unique(d.raw$p1)#
+rownames(d.mat) <- unique(d.raw$p2)#
+#
+for (i in 1:nrow(d.raw)) {#
+    i.idx               <- grep(d.raw[i,c("p2")] , rownames(d.mat))#
+    j.idx               <- grep(d.raw[i,c("p1")] , colnames(d.mat))#
+    d.mat[i.idx,j.idx]  <- d.mat[i.idx,j.idx] + 1#
+}
+head(d.mat)
+which(d.raw$p1 == "AT")
+which(d.raw$p2 == "AT")
+intersect(which(d.raw$p1 == "AT"), which(d.raw$p2 == "AT"))
+tail(d.mat)
+d.mat[1:100,]
+d.raw[which(d.raw4p1 == "4A"),]
+d.raw[which(d.raw$p1 == "4A"),]
+d.raw[which(d.raw$p2 == "4A"),]
+head(r.raw)
+head(d.raw)
+table(d.raw$nch)
+h
+strsplit(h, "")
+sort(strsplit(h, ""))
+sort(unlist(strsplit(h, "")))
+h <- "KQ29"
+sort(unlist(strsplit(h, "")))
+strsplit(h, "")
+which(strsplit(h, "") %in% rank)
+strsplit(h, "")
+which(unlist(strsplit(h, "")) %in% rank)
+which(rank %in% unlist(strsplit(h, "")))
+q()
