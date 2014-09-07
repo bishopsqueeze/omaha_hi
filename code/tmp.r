@@ -171,3 +171,67 @@ Ax*x:([T+][T+][T+])
 
 ## Case 6 (108289 hands)
 40%
+
+
+
+
+
+## Potential 3-bet range
+
+AA,
+KK:xx,
+QQ:xx,
+KK:([A-9][A-9])!RRR,
+KK:([8-6][8-6]),
+QQ:([A-9][A-9])!RRR,
+KKRR,
+QQRR,
+A[T+][T+][T+]!RRR,
+[K-9][K-9][K-9][K-9]:xx!RRR,
+[7+][7+][7+][7+]:RROO:xx,
+[2-9][2-9][2-9][2-9]:RROO,
+A[K-T][K-T][9-2]:Ax*x,
+[K-9][K-9][K-9][8-2]:xxyy!RRR,
+9T+:56+:xxyy,
+J9+:56+:xxyy,
+[7-Q][7-Q][7-Q][7-Q]!RRR,
+7654+:xxyy,
+8764+:xxyy,
+8754+:xxyy,
+8654+:xxyy,
+9864+:xxyy
+
+
+
+
+AA,
+KK:xx,
+QQ:xx,
+KK:([A-9][A-9])!RRR,
+QQ:([A-9][A-9])!RRR,
+KKRR,
+QQRR,
+A[T+][T+][T+]!RRR,
+[K-9][K-9][K-9][K-9]:xx!RRR,
+[7+][7+][7+][7+]:RROO:xx,
+A[K-T][K-T][9-2]:Ax*x,
+[K-9][K-9][K-9][8-2]:xxyy!RRR,
+8765+:xxyy,
+9875+:xxyy,
+9865+:xxyy
+
+
+
+## Example
+select /* Start equity stats */
+avg(riverEquity(PLAYER_1)) as PLAYER_1_equity1,
+avg(riverEquity(PLAYER_2)) as PLAYER_2_equity1,
+avg(riverEquity(PLAYER_3)) as PLAYER_3_equity1
+/* End equity stats */
+from game='omahahi', syntax='Generic',
+PLAYER_1='100%',
+PLAYER_2='100%',
+PLAYER_3='10%'
+
+
+
