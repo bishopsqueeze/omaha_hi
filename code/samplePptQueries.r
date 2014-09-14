@@ -11,6 +11,8 @@
 # RunPQL -c
 # RunPQL 'select avg(6) from game='holdem'; select avg(1) from game='omahahi'
 
+## stopped @ j iteration =  5735
+
 rm(list=ls())
 
 ## read the hand file
@@ -33,7 +35,7 @@ pct.vec <- c(seq(5, 40, 5), seq(50, 100, 25))
 res.vec <- vector(,length=length(pct.vec))
 res.mat <- matrix(,nrow=dim(hf.6max)[1], ncol=length(res.vec))
 
-for (j in 1:2) {
+for (j in 1:dim(hf.6max)[1]) {
     
     tmp.h   <- as.character(droplevels(hf.6max[j, 1]))
     
@@ -65,7 +67,7 @@ rownames(res.mat) <- as.character(hf.6max[,1])
 
 
 ## save the results
-save.image(file="/Users/alexstephens/Development/poker/omaha_hi/data/hotColdEquity_6max.Rdata")
+#save.image(file="/Users/alexstephens/Development/poker/omaha_hi/data/hotColdEquity_6max.Rdata")
 
 
 
