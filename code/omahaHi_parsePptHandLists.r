@@ -72,14 +72,22 @@ processHandFile <- function(in.file) {
     tmp.file    <- unlist(strsplit(in.file, "[.]"))
     out.file    <- paste0(tmp.file[1], "_genericSyntax_DEBUG", ".", tmp.file[2])
 
-    ## read the input file and create an identically-sized output matrix
+    ## read the input file
     hf          <- read.csv(in.file, header=FALSE)
-    ho          <- matrix(,nrow=nrow(hf), ncol=1)
-    hs          <- matrix(,nrow=nrow(hf), ncol=2)
-    hg          <- matrix(,nrow=nrow(hf), ncol=1)
+    
+    ## create output matrices
+    hand.shape  <- matrix(,nrow=nrow(hf), ncol=1)
+    suit.shape  <- matrix(,nrow=nrow(hf), ncol=1)
+    pair.shape  <- matrix(,nrow=nrow(hf), ncol=1)
+    pair.ranks  <- matrix(,nrow=nrow(hf), ncol=2)
+    high.card   <- matrix(,nrow=nrow(hf), ncol=1)
+    high.suited <- matrix(,nrow=nrow(hf), ncol=1)
+    rank.conn   <- matrix(,nrow=nrow(hf), ncol=1)
+    rank.gaps   <- matrix(,nrow=nrow(hf), ncol=1)
 
     ## loop over each row in the file and process the ranked hand
     for (i in 1:nrow(hf)) {
+        #for (i in 1:1147) {
         
         ## process a hand
         tmp.ch      <- unlist(strsplit(as.character(hf[i,]), ""))   ## split hand into individual characters
@@ -100,40 +108,36 @@ processHandFile <- function(in.file) {
         ## of the right and left parentheses to assign the suits
         ##------------------------------------------------------------------
   
+        ##------------------------------------------------------------------
+        ## Deconstruct suits and identify suit shapes
+        ##------------------------------------------------------------------
         ## double suited
         if (tmp.nch == 8) {
-            
             tmp.suits   <- c("x","x","y","y")
             tmp.color   <- c("ds")
-        
         ## single suited
         } else if (tmp.nch == 6) {
         
             ## (XY)ZW [1,4]
             if ((tmp.lp == 1) & (tmp.rp == 4)) {
                 tmp.suits   <- c("x","x","y","z")
-                tmp.color   <- c("ss")
-            
+                tmp.color   <- c("ss.2o")
             ## X(YZ)W [2,5]
             } else if ((tmp.lp == 2) & (tmp.rp == 5)) {
                 tmp.suits   <- c("x","y","y","z")
-                tmp.color   <- c("ss")
-            
+                tmp.color   <- c("ss.2o")
             ## XY(ZW) [3,6]
             } else if ((tmp.lp == 3) & (tmp.rp == 6)) {
                 tmp.suits   <- c("x","y","z","z")
-                tmp.color   <- c("ss")
-            
+                tmp.color   <- c("ss.2o")
             ## (XYZ)W [1,5]
             } else if ((tmp.lp == 1) & (tmp.rp == 5)) {
                 tmp.suits   <- c("x","x","x","y")
-                tmp.color   <- c("ss")
-            
+                tmp.color   <- c("ss.1o")
             ## X(YZW) [2,6]
             } else if ((tmp.lp == 2) & (tmp.rp == 6)) {
                 tmp.suits   <- c("x","y","y","y")
-                tmp.color   <- c("ss")
-            
+                tmp.color   <- c("ss.1o")
             ## (XYZW) [1,6]
             } else if ((tmp.lp == 1) & (tmp.rp == 6)) {
                 tmp.suits   <- c("x","x","x","x")
@@ -144,140 +148,157 @@ processHandFile <- function(in.file) {
         } else if (tmp.nch == 4) {
             tmp.suits   <- c("x","y","z","w")
             tmp.color   <- c("rb")
-        
         ## error
         } else {
             stop("unexpected string lenght\n")
         }
-    
+        hand.shape[i,1]     <- appendSuits(tmp.ranks, tmp.suits)
+        suit.shape[i,1]     <- tmp.color
+
+
         ##------------------------------------------------------------------
-        ## characterize the number of duplicate ranks
+        ## Identify pair types
         ##------------------------------------------------------------------
         if (max(tmp.tbl) == 4) {
-            tmp.count   <- c("qu")
+            tmp.count   <- c("4k")
+            tmp.hipair  <- glob.rank[min(which(glob.rank %in% names(tmp.tbl[tmp.tbl >= 2])))]
+            tmp.lopair  <- NA
         } else if (max(tmp.tbl) == 3) {
-            tmp.count   <- c("tr")
+            tmp.count   <- c("3k")
+            tmp.hipair  <- glob.rank[min(which(glob.rank %in% names(tmp.tbl[tmp.tbl >= 2])))]
+            tmp.lopair  <- NA
         } else if (max(tmp.tbl == 2)) {
             if (tmp.unq == 2) {
-                tmp.count   <- c("dp")
+                tmp.count   <- c("2p")
+                tmp.hipair  <- glob.rank[min(which(glob.rank %in% names(tmp.tbl[tmp.tbl >= 2])))]
+                tmp.lopair  <- glob.rank[max(which(glob.rank %in% names(tmp.tbl[tmp.tbl >= 2])))]
             } else {
-                tmp.count   <- c("sp")
+                tmp.count   <- c("1p")
+                tmp.hipair  <- glob.rank[min(which(glob.rank %in% names(tmp.tbl[tmp.tbl >= 2])))]
+                tmp.lopair  <- NA
             }
         } else {
-            
-            ##
-            if ( all(tmp.gaps <= 4) &  all(tmp.gaps >= 0) ) {
-                
-                
-## move the logic for pairs/trips/quads into this segment (under the 0 gap area)
-## ... or maybe just have a column for pair/trip quads, no pair and another
-## column for rundown categories (vs. danglers)
-## and somehow incorporate pair plus connected
-                
-                ## rundown
-                if (all(tmp.gaps == 1)) {
-                    tmp.count <- c("rd")
-                    
-                ## connected pairs
-                } else if ( tmp.gaps[1] == 0 & all(tmp.gaps[c(2,3)] %in% c(1,2))) {
-                    tmp.count <- c("sp+c")
-                } else if ( tmp.gaps[2] == 0 & all(tmp.gaps[c(1,3)] %in% c(1,2))) {
-                    tmp.count <- c("sp+c")
-                } else if ( tmp.gaps[3] == 0 & all(tmp.gaps[c(1,2)] %in% c(1,2))) {
-                    tmp.count <- c("sp+c")
-                    
-                ## single 1-gappers
-                } else if ( tmp.gaps[1] == 2 & all(tmp.gaps[c(2,3)] == 1)) {
-                    tmp.count <- c("t1g")
-                } else if ( tmp.gaps[2] == 2 & all(tmp.gaps[c(1,3)] == 1)) {
-                    tmp.count <- c("m1g")
-                } else if ( tmp.gaps[3] == 2 & all(tmp.gaps[c(1,2)] == 1)) {
-                    tmp.count <- c("b1g")
-                ## double 1-gappers
-                } else if ( all(tmp.gaps[c(1,2)] == 2) & tmp.gaps[3] == 1) {
-                    tmp.count <- c("tm1g")
-                } else if ( all(tmp.gaps[c(2,3)] == 2) & tmp.gaps[1] == 1) {
-                    tmp.count <- c("mb1g")
-                } else if ( all(tmp.gaps[c(1,3)] == 2) & tmp.gaps[2] == 1) {
-                    tmp.count <- c("tb1g")
-                ## triple 1-gapper
-                } else if ( all(tmp.gaps == 2) ) {
-                    tmp.count <- c("tmb1g")
-                    
-                ## single 2-gappers
-                } else if ( tmp.gaps[1] == 3 & all(tmp.gaps[c(2,3)] == 1)) {
-                    tmp.count <- c("t2g")
-                } else if ( tmp.gaps[2] == 3 & all(tmp.gaps[c(1,3)] == 1)) {
-                    tmp.count <- c("m2g")
-                } else if ( tmp.gaps[3] == 3 & all(tmp.gaps[c(1,2)] == 1)) {
-                    tmp.count <- c("b2g")
-                ## double 2-gappers
-                } else if ( tmp.gaps[1] == 3 & all(tmp.gaps[c(2,3)] == 1)) {
-                    tmp.count <- c("t2g")
-                } else if ( tmp.gaps[2] == 3 & all(tmp.gaps[c(1,3)] == 1)) {
-                    tmp.count <- c("m2g")
-                } else if ( tmp.gaps[3] == 3 & all(tmp.gaps[c(1,2)] == 1)) {
-                    tmp.count <- c("b2g")
-                ## triple 2-gapper
-                } else if ( all(tmp.gaps == 3) ) {
-                    tmp.count <- c("tmb2g")
-                    
-                ## single 3-gappers
-                } else if ( tmp.gaps[1] == 4 & all(tmp.gaps[c(2,3)] == 1)) {
-                    tmp.count <- c("t3g")
-                } else if ( tmp.gaps[2] == 4 & all(tmp.gaps[c(1,3)] == 1)) {
-                    tmp.count <- c("m3g")
-                } else if ( tmp.gaps[3] == 4 & all(tmp.gaps[c(1,2)] == 1)) {
-                    tmp.count <- c("b3g")
-                ## double 3-gappers
-                } else if ( tmp.gaps[1] == 4 & all(tmp.gaps[c(2,3)] == 1)) {
-                    tmp.count <- c("t3g")
-                } else if ( tmp.gaps[2] == 4 & all(tmp.gaps[c(1,3)] == 1)) {
-                    tmp.count <- c("m3g")
-                } else if ( tmp.gaps[3] == 4 & all(tmp.gaps[c(1,2)] == 1)) {
-                    tmp.count <- c("b3g")
-                ## triple 3-gapper
-                } else if ( all(tmp.gaps == 4) ) {
-                    tmp.count <- c("tmb3g")
-                    
-                ## backstop
-                } else {
-                    tmp.count <- c("np")
-                }
-             
-            } else {
-                tmp.count   <- c("np")
-            }
-            
+            tmp.count   <- c("0p")
+            tmp.hipair  <- NA
+            tmp.lopair  <- NA
         }
+        pair.shape[i,1]     <- tmp.count
+        pair.ranks[i,]      <- c(tmp.hipair, tmp.lopair)
+ 
+        ##------------------------------------------------------------------
+        ## Identify high card
+        ##------------------------------------------------------------------
+        high.card[i,]  <- glob.rank[which(glob.num == max(tmp.nums))]
+        
+        ##------------------------------------------------------------------
+        ## Identify high card
+        ##------------------------------------------------------------------
+        ## get suits tied to the high card
+        hi.suits        <- tmp.suits[which(tmp.ranks %in% high.card[i,])]
+        non.hi.suits    <- tmp.suits[which(!(tmp.ranks %in% high.card[i,]))]
+        if (length(which(hi.suits %in% non.hi.suits)) > 0) {
+            high.suited[i,] <- "Y"
+        } else {
+            high.suited[i,] <- "N"
+        }
+        
+        ##------------------------------------------------------------------
+        ## Identify connectedness
+        ##------------------------------------------------------------------
+        
+        ## pure rundown variants
+        if (all(tmp.gaps == 1)) {
+            tmp.conn    <- "rd.0g"
+        } else if ( all(tmp.gaps == 2)) {
+            tmp.conn    <- "rd.1g"
+        } else if (all(tmp.gaps == 3)) {
+            tmp.conn    <- "rd.2g"
+            
+        ## connected 2-pair
+        } else if ( (tmp.gaps[1] == 0) & (tmp.gaps[3] == 0) & (tmp.gaps[2] %in% c(1,2,3)) ) {
+            tmp.conn    <- "2p.conn"
+    
+        ## rundown plus pair
+        } else if ( (sum(tmp.gaps==0)==1) & (sum(tmp.gaps==1)==2) ) {
+            tmp.conn    <- "rd.1p"
+            
+        ## single gap rundown
+        } else if ( (sum(tmp.gaps==2)==1) & (sum(tmp.gaps==1)==2) ) {
+            tmp.conn    <- "rd.1g"
+
+        ## double gap rundown
+        } else if ( (sum(tmp.gaps==3)==1) & (sum(tmp.gaps==1)==2) ) {
+            tmp.conn    <- "rd.2g"
+
+        ## triple gap rundown
+        } else if ( (sum(tmp.gaps==4)==1) & (sum(tmp.gaps==1)==2) ) {
+            tmp.conn    <- "rd.3g"
+
+        ## dangler gap rundown
+        } else if ( (sum(tmp.gaps>4)==1) & (sum(tmp.gaps==1)==2) ) {
+            tmp.conn    <- "rd.dg"
+
+        ## 2x single gap rundown
+        } else if ( (sum(tmp.gaps==1)==1) & (sum(tmp.gaps==2)==2) ) {
+            tmp.conn    <- "rd.2x1g"
+
+        ## 2x double gap rundown
+        } else if ( (sum(tmp.gaps==1)==1) & (sum(tmp.gaps==3)==2) ) {
+            tmp.conn    <- "rd.2x2g"
+  
+        ## connected single-pair
+        } else if ( (sum(tmp.gaps==0)==1) & (sum(tmp.gaps==1)==1) & (sum(tmp.gaps==2)==1) ) {
+            tmp.conn    <- "1p.conn"
+ 
+        ## default
+        } else {
+            tmp.conn    <- NA
+        }
+        rank.conn[i,]   <- tmp.conn
 
 
-    
-    
-    ## insert the hand translated into generic syntax to a matrix
-    ho[i,1]     <- appendSuits(tmp.ranks, tmp.suits)
-    hs[i,]      <- c(tmp.color, tmp.count)
-    hg[i,1]     <- paste0(tmp.gaps, collapse=":")
+        ##------------------------------------------------------------------
+        ## Consolidate gap data
+        ##------------------------------------------------------------------
+        rank.gaps[i,]   <- paste(tmp.gaps, collapse=":")
+
     }
 
-    ## save the output as a file
-    #write.table(ho, file=out.file, row.names=FALSE, col.names=FALSE)
-    return(list(hf=hf, ho=ho, hs=hs, hg=hg))
-}
 
+    ## consolidate
+    hand.data   <- data.frame(  hand=hand.shape,
+                                suit=suit.shape,
+                                pair=pair.shape,
+                                ranks=pair.ranks,
+                                highCard=high.card,
+                                highSuited=high.suited,
+                                conn=rank.conn,
+                                gaps=rank.gaps)
+
+    colnames(hand.data) <- c("hand","suit","pair","hiPair","loPair","hiCard","hiSuited","conn","gaps")
+    
+    
+    ## save the output as a file
+    #write.table(hand.shape, file=out.file, row.names=FALSE, col.names=FALSE)
+    return(list(ho=hand.shape, hd=hand.data))
+}
 
 
 ##------------------------------------------------------------------
 ## <main> process hands
 ##------------------------------------------------------------------
 
-##processHandFile("ppt_plo_handrankings_03handed.txt")
+plo_3max.list   <- processHandFile("ppt_plo_handrankings_03handed.txt")
+save(plo_3max.list, file="ppt_plo_handrankings_03handed.Rdata")
 
 plo_6max.list   <- processHandFile("ppt_plo_handrankings_06handed.txt")
 save(plo_6max.list, file="ppt_plo_handrankings_06handed.Rdata")
 
-##processHandFile("ppt_plo_handrankings_10handed.txt")
-##processHandFile("ppt_plo_handrankings_preflop_vs_random.txt")
+plo_10max.list  <- processHandFile("ppt_plo_handrankings_10handed.txt")
+save(plo_10max.list, file="ppt_plo_handrankings_10handed.Rdata")
+
+plo_random.list <- processHandFile("ppt_plo_handrankings_preflop_vs_random.txt")
+save(plo_random.list, file="ppt_plo_handrankings_preflop_vs_random.Rdata")
 
 
 ##------------------------------------------------------------------
