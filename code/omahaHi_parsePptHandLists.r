@@ -78,12 +78,15 @@ processHandFile <- function(in.file) {
     ## create output matrices
     hand.shape  <- matrix(,nrow=nrow(hf), ncol=1)
     suit.shape  <- matrix(,nrow=nrow(hf), ncol=1)
+    suit.combo  <- matrix(,nrow=nrow(hf), ncol=1)
     pair.shape  <- matrix(,nrow=nrow(hf), ncol=1)
     pair.ranks  <- matrix(,nrow=nrow(hf), ncol=2)
     high.card   <- matrix(,nrow=nrow(hf), ncol=1)
     high.suited <- matrix(,nrow=nrow(hf), ncol=1)
     rank.conn   <- matrix(,nrow=nrow(hf), ncol=1)
     rank.gaps   <- matrix(,nrow=nrow(hf), ncol=1)
+    shape.type  <- matrix(,nrow=nrow(hf), ncol=1)
+    shape.wgt   <- matrix(,nrow=nrow(hf), ncol=1)
 
     ## loop over each row in the file and process the ranked hand
     for (i in 1:nrow(hf)) {
@@ -157,6 +160,24 @@ processHandFile <- function(in.file) {
 
 
         ##------------------------------------------------------------------
+        ## Create homogeneous suit combos
+        ##------------------------------------------------------------------
+        tmp.combo   <- paste0(tmp.suits, collapse="")
+        
+        if (tmp.combo %in% c("xxxx")) {
+            suit.combo[i,1] <- c("aaaa")
+        } else if (tmp.combo %in% c("xxxy","xyyy")) {
+            suit.combo[i,1] <- c("aaab")
+        } else if (tmp.combo %in% c("xxyy")) {
+            suit.combo[i,1] <- c("aabb")
+        } else if (tmp.combo %in% c("xxyz","xyyz","xyzz")) {
+            suit.combo[i,1] <- c("aabc")
+        } else if (tmp.combo %in% c("xyzw")) {
+            suit.combo[i,1] <- c("abcd")
+        }
+
+
+        ##------------------------------------------------------------------
         ## Identify pair types
         ##------------------------------------------------------------------
         if (max(tmp.tbl) == 4) {
@@ -186,10 +207,95 @@ processHandFile <- function(in.file) {
         pair.ranks[i,]      <- c(tmp.hipair, tmp.lopair)
  
         ##------------------------------------------------------------------
+        ## Identify shape types
+        ##------------------------------------------------------------------
+        if (pair.shape[i,1] == "4k") {
+            ## XaXbXcXd	4K::abcd
+            tmp.shape   <- "XaXbXcXd"
+            tmp.wgt     <- (13/13)
+        } else if (pair.shape[i,1] == "3k") {
+            ## XaXbXcYa	3K::aabc
+            if (suit.combo[i,1] == "aabc") {
+                tmp.shape   <- "XaXbXcYa"
+                tmp.wgt     <- (1872/156)
+            ## XaXbXcYd	3K::abcd
+            } else if (suit.combo[i,1] == "abcd") {
+                tmp.shape   <- "XaXbXcYd"
+                tmp.wgt     <- (624/156)
+            }
+        } else if (pair.shape[i,1] == "2p") {
+            ## XaXbYaYb	2P::aabb
+            if (suit.combo[i,1] == "aabb") {
+                tmp.shape   <- "XaXbYaYb"
+                tmp.wgt     <- (468/78)
+            ## XaXbYaYc	2P::aabc
+            } else if (suit.combo[i,1] == "aabc") {
+                tmp.shape   <- "XaXbYaYc"
+                tmp.wgt     <- (1872/78)
+            ## XaXbYcYd	2P::abcd
+            } else if (suit.combo[i,1] == "abcd") {
+                tmp.shape   <- "XaXbYcYd"
+                tmp.wgt     <- (468/78)
+            }
+        } else if (pair.shape[i,1] == "1p") {
+            ## XaXbYaZa	1P::aaab
+            if (suit.combo[i,1] == "aaab") {
+                tmp.shape   <- "XaXbYaZa"
+                tmp.wgt     <- (10296/858)
+            ## XaXbYaZb	1P::aabb
+            } else if (suit.combo[i,1] == "aabb") {
+                tmp.shape   <- "XaXbYaZb"
+                tmp.wgt     <- (10296/858)
+            ## XaXbYaZc	1P::aabc
+            } else if (suit.combo[i,1] == "aabc") {
+                tmp.shape   <- "XaXbYaZc"
+                tmp.wgt     <- (41184+10296)/(1716+858)
+            ## XaXbYcZc	1P::aabc
+            #} else if (suit.combo[i,1] == "ss.2o") {
+            #    tmp.shape   <- "XaXbYaZc"
+            ## XaXbYcZd	1P::abcd
+            } else if (suit.combo[i,1] == "abcd") {
+                tmp.shape   <- "XaXbYcZd"
+                tmp.wgt     <- (10296/858)
+            }
+            
+        } else if (pair.shape[i,1] == "0p") {
+
+            ## XaYaZaRa	NP::aaaa
+            if (suit.combo[i,1] == "aaaa") {
+                tmp.shape   <- "XaYaZaRa"
+                tmp.wgt     <- (2860/715)
+            ## XaYaZaRb	NP::aaab
+            } else if (suit.combo[i,1] == "aaab") {
+                tmp.shape   <- "XaYaZaRb"
+                tmp.wgt     <- (34320/2860)
+            ## XaYaZbRb	NP::aabb
+            } else if (suit.combo[i,1] == "aabb") {
+                tmp.shape   <- "XaYaZbRb"
+                tmp.wgt     <- (25740/2145)
+            ## XaYaZbRc	NP::aabc
+            } else if (suit.combo[i,1] == "aabc") {
+                tmp.shape   <- "XaYaZbRc"
+                tmp.wgt     <- (102960/4290)
+            ## XaYbZcRd	NP::abcd
+            } else if (suit.combo[i,1] == "abcd") {
+                tmp.shape   <- "XaYbZcRd"
+                tmp.wgt     <- (17160/715)
+            }
+
+        } else {
+            tmp.shape <- "err"
+        }
+        shape.type[i,]  <- tmp.shape
+        shape.wgt[i,]   <- tmp.wgt
+        
+
+        ##------------------------------------------------------------------
         ## Identify high card
         ##------------------------------------------------------------------
         high.card[i,]  <- glob.rank[which(glob.num == max(tmp.nums))]
-        
+
+
         ##------------------------------------------------------------------
         ## Identify high card
         ##------------------------------------------------------------------
@@ -201,7 +307,8 @@ processHandFile <- function(in.file) {
         } else {
             high.suited[i,] <- "N"
         }
-        
+  
+  
         ##------------------------------------------------------------------
         ## Identify connectedness
         ##------------------------------------------------------------------
@@ -268,6 +375,9 @@ processHandFile <- function(in.file) {
     ## consolidate
     hand.data   <- data.frame(  hand=hand.shape,
                                 suit=suit.shape,
+                                suitCombo=suit.combo,
+                                shapeType=shape.type,
+                                shapeWgt=shape.wgt,
                                 pair=pair.shape,
                                 ranks=pair.ranks,
                                 highCard=high.card,
@@ -275,11 +385,9 @@ processHandFile <- function(in.file) {
                                 conn=rank.conn,
                                 gaps=rank.gaps)
 
-    colnames(hand.data) <- c("hand","suit","pair","hiPair","loPair","hiCard","hiSuited","conn","gaps")
+    colnames(hand.data) <- c("hand","suit","suitCombo","shapeType","shapeWgt","pair","hiPair","loPair","hiCard","hiSuited","conn","gaps")
     
-    
-    ## save the output as a file
-    #write.table(hand.shape, file=out.file, row.names=FALSE, col.names=FALSE)
+    ## return the results
     return(list(ho=hand.shape, hd=hand.data))
 }
 
